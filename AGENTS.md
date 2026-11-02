@@ -581,6 +581,8 @@ adb shell dpm remove-active-admin com.MAXA_PHONE_LAUNCHER.launcher/.KioskDeviceA
 | Клавиатура закрывается при вводе | Проверить, что в `KioskAccessibilityService` есть проверка IME и поиск URL только в верхней панели |
 | Пропали звонки/SMS | Включить обратно `com.android.phone`, `com.android.server.telecom`, `com.google.android.apps.messaging` |
 | Телефон не загружается | Загрузиться в safe mode / recovery, `pm enable` критичных пакетов через ADB |
+| Висит `ScreenOnProximitySensorGuide`, экран не реагирует | `adb shell am force-stop com.android.systemui`, затем `scripts/reapply-kiosk.ps1` |
+| `input swipe`/`keyevent` падает с `INJECT_EVENTS` | Это ограничение MIUI; физические действия выполняет пользователь, либо используйте `am start` и логи |
 
 ---
 

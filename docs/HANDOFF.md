@@ -588,15 +588,43 @@ APK лаунчера после отключения приложений не �
 - Флаги `send-disable-flag` остаются дополнительной защитой; их можно
   вернуть скриптом `scripts/reapply-kiosk.ps1`.
 
+Проверка overlay:
+
+- Chrome: в логе `Top guard added, height=103`, в `dumpsys window` появилось
+  окно `com.MAXA_PHONE_LAUNCHER.launcher` типа accessibility overlay.
+- Возврат на главный экран: `Top guard removed`, окно исчезло.
+- Физический свайп проверить через ADB нельзя: MIUI не даёт shell
+  `INJECT_EVENTS` (`SecurityException`). Нужно проверить пальцем: в Chrome
+  шторка не должна вытягиваться, а в лаунчере быстрые настройки должны
+  открываться.
+
 Ограничения overlay:
 
 - Он закрывает только верхнюю полосу статус-бара, а не всю шторку;
   системные жесты из других зон могут работать.
 - Если прошивка не разрешает `TYPE_ACCESSIBILITY_OVERLAY`, в логе будет
   `Top guard add failed`; тогда остаётся только device owner/root.
-- На MIUI экран был выключен во время автоматической проверки, а ADB
-  не имеет `INJECT_EVENTS`, поэтому свайп нужно проверить вручную:
-  открыть Chrome и потянуть шторку сверху.
+
+### Зависшая подсказка датчика приближения
+
+Во время проверки на экране висело системное окно MIUI
+`ScreenOnProximitySensorGuide` (type 2018, owner `android`), которое
+блокировало ввод. Оно появилось из-за закрытого датчика приближения при
+включении экрана и не исчезло само. Лечится без перезагрузки:
+
+```powershell
+adb shell am force-stop com.android.systemui
+```
+
+SystemUI перезапускается, подсказка исчезает, лаунчер снова получает
+фокус. После этого нужно заново применить флаги шторки:
+`scripts/reapply-kiosk.ps1`.
+
+Глобальная настройка `enable_screen_on_proximity_sensor` существует, но
+MIUI не даёт adb shell писать в `Settings.Global`
+(`WRITE_SECURE_SETTINGS`). Без root/device owner отключить датчик
+программно нельзя. Если подсказка повторяется — проверить зону датчика
+(защитное стекло, чехол, загрязнение) и перезагрузить телефон.
 
 Файл: `platforms/android/app/src/main/java/org/apache/cordova/labs/kiosk/KioskAccessibilityService.java`
 (методы `updateTopGuard`, `addTopGuard`, `removeTopGuard`).
