@@ -120,6 +120,25 @@ adb shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
 
 После переустановки APK accessibility-службу обычно нужно включить заново.
 
+## Отключение лишних приложений
+
+На тестовом устройстве отключено 128 неиспользуемых пакетов (игры, соцсети,
+Google Play, YouTube, Maps, Gmail, реклама MIUI, сервисы MI Cloud и т.п.).
+Скрипт для повторения:
+
+```powershell
+.\scripts\disable-unused-apps.ps1
+```
+
+Вернуть всё обратно:
+
+```powershell
+.\scripts\disable-unused-apps.ps1 -Restore
+```
+
+Подробный список и что оставлено включённым — в `docs/HANDOFF.md`, раздел 12.
+Установка приложений после отключения Google Play — через RuStore (`ru.vk.store`).
+
 ## Блокировка сайтов
 
 Список находится в

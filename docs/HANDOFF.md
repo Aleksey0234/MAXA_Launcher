@@ -428,5 +428,137 @@ lock task выключен, accessibility-служба выключена; па�
   **RuStore** (`ru.vk.store`), а не школьный дневник. RuStore уже установлен.
   Для пункта «Дневник» нужен правильный APK или точное имя пакета.
 
+---
+
+## 12. Отключение неиспользуемых приложений (02.11.2026)
+
+Цель — снизить фоновую нагрузку, уведомления и сетевую активность.
+Все приложения отключены для пользователя 0 командой:
+
+```powershell
+adb shell pm disable-user --user 0 <package>
+```
+
+Итого отключено **128** пакетов. Включёнными оставлены только системные
+компоненты, нужные для связи, камеры, файлов, настроек и самого лаунчера.
+
+### Что отключено
+
+- **Игры и развлечения:** `com.mobile.legends`, `com.tencent.igxiaomi`,
+  `com.igg.android.lordsmobile`, `com.nebula.rotaterings`,
+  `com.puzzlegames.puzzlebrickslegend`, `com.kms.free`, `com.zroute.global`,
+  `com.netflix.mediaclient`, `com.zhiliaoapp.musically`,
+  `com.google.android.youtube`, `com.google.android.apps.youtube.music`,
+  `com.google.android.videos`, `ru.ivi.client`, `com.vk.vkvideo`,
+  `com.google.android.apps.photos`, `com.google.ar.core`.
+- **Соцсети/мессенджеры:** `com.facebook.katana`, `com.facebook.system`,
+  `com.facebook.services`, `com.facebook.appmanager`, `com.yandex.zen`,
+  `com.yandex.browser`, `ru.yandex.searchplugin`,
+  `com.yandex.preinstallsatellite`, `com.yandex.zenkitpartnerconfig`,
+  `com.mi.global.bbs`, `com.xiaomi.barrage`.
+- **Магазины и реклама:** `com.android.vending` (Google Play — установка
+  теперь через RuStore), `com.xiaomi.market`/`com.xiaomi.mipicks`,
+  `com.miui.msa.global`, `com.miui.analytics`, `com.miui.miservice`,
+  `com.miui.bugreport`, `com.google.android.feedback`,
+  `com.google.android.adservices.api`, `com.google.mainline.adservices`,
+  `com.google.android.ondevicepersonalization.services`,
+  `com.google.mainline.telemetry`, `com.mi.global.shop`,
+  `com.xiaomi.payment`, `org.mipay.android.manager`,
+  `com.tencent.soter.soterserver`.
+- **Медиа/утилиты MIUI:** `com.miui.videoplayer`, `com.miui.player`,
+  `com.miui.fm`, `com.miui.fmservice`, `com.miui.compass`, `com.miui.notes`,
+  `com.miui.calculator`, `com.miui.weather2`, `com.xiaomi.scanner`,
+  `com.miui.screenrecorder`, `com.miui.soundrecorder`, `com.miui.qr`,
+  `com.miui.extraphoto`, `com.miui.mediaeditor`, `com.xiaomi.cameratools`,
+  `com.miui.cleaner`, `com.miui.touchassistant`, `com.miui.yellowpage`,
+  `com.mi.globalminusscreen`, `com.mi.globalbrowser`, `com.miui.mishare.connectivity`,
+  `com.miui.phrase`, `com.miui.backup`, `com.miui.guardprovider`,
+  `com.milink.service`, `com.xiaomi.midrop`, `com.xiaomi.calendar`,
+  `com.xiaomi.scanner`.
+- **Google-сервисы, не нужные лаунчеру:** `com.google.android.gm`,
+  `com.google.android.apps.maps`, `com.google.android.apps.wellbeing`,
+  `com.google.android.apps.safetyhub`, `com.google.android.apps.restore`,
+  `com.google.android.apps.turbo`, `com.google.android.apps.docs`,
+  `com.google.android.apps.tachyon`, `com.google.android.apps.kids.familylinkhelper`,
+  `com.google.android.setupwizard`, `com.google.android.onetimeinitializer`,
+  `com.google.android.partnersetup`, `com.google.android.syncadapters.calendar`,
+  `com.google.android.tts`, `com.google.android.marvin.talkback`,
+  `com.google.android.nearby.halfsheet`, `com.google.android.as`,
+  `com.google.android.as.oss`, `com.google.android.gms.location.history`,
+  `com.google.android.printservice.recommendation`,
+  `com.android.hotwordenrollment.okgoogle`,
+  `com.android.hotwordenrollment.xgoogle`.
+- **Печать, тесты, логи, служебное:** `com.android.printspooler`,
+  `com.android.bips`, `com.android.dreams.basic`, `com.android.egg`,
+  `com.android.traceur`, `com.android.bookmarkprovider`,
+  `com.android.providers.partnerbookmarks`, `com.android.cts.ctsshim`,
+  `com.android.cts.priv.ctsshim`, `com.android.bluetoothmidiservice`,
+  `com.mi.AutoTest`, `com.huaqin.factory`, `com.goodix.gftest`,
+  `com.fingerprints.sensortesttool`, `com.debug.loggerui`,
+  `com.bsp.catchlog`, `com.mediatek.engineermode`,
+  `com.mediatek.mdmlsample`, `com.mediatek.callrecorder`,
+  `com.mediatek.voicecommand`, `com.mediatek.voiceunlock`.
+- **Прочее:** `com.xiaomi.mircs`, `com.xiaomi.xmsf`,
+  `com.xiaomi.xmsfkeeper`, `com.xiaomi.simactivate.service`,
+  `com.xiaomi.glgm`, `com.miui.cloudservice`, `com.miui.cloudbackup`,
+  `com.miui.micloudsync`, `com.miui.misound`, `com.miuix.editor`,
+  `com.maxim.internal` (такси Maxim RU), `com.micredit.in`,
+  `cn.wps.xiaomi.abroad.lite`, `com.duokan.phone.remotecontroller`.
+
+### Что оставлено включённым и почему
+
+- Лаунчер и его приложения: `com.MAXA_PHONE_LAUNCHER.launcher`,
+  `com.android.chrome`, `com.google.android.dialer`, `com.android.camera`,
+  `com.android.deskclock`, `com.mi.android.globalFileexplorer`,
+  `com.android.settings`, `ru.vk.store`, `ru.mes.dnevnik.fgis`,
+  `com.vol.app`, `ru.oneme.app`.
+- Ввод: `com.google.android.inputmethod.latin` (Gboard),
+  `com.miui.miinput` (системный запасной ввод).
+- Связь: `com.android.phone`, `com.android.server.telecom`,
+  `com.android.providers.telephony`, `com.android.mms.service`,
+  `com.google.android.apps.messaging` (SMS/MMS на случай установки SIM),
+  `com.android.stk`, `com.mediatek.ims`, `com.mediatek.telephony`.
+- Система MIUI: `com.miui.securitycenter`, `com.miui.securitycore`,
+  `com.lbe.security.miui`, `com.miui.powerkeeper`, `com.miui.daemon`,
+  `com.miui.notification`, `com.miui.screenshot`, `com.miui.gallery`,
+  `com.miui.miwallpaper`, `com.miui.home` (защищён от отключения:
+  «Cannot disable miui core packages»), `com.xiaomi.misettings`.
+- Google: `com.google.android.gms`, `com.google.android.gsf`,
+  `com.google.android.webview`, `com.google.android.permissioncontroller`,
+  `com.google.android.providers.media.module`, `com.android.vending`
+  **отключён** — для установки использовать RuStore.
+- Биометрия/безопасность: `com.miui.face`, `org.ifaa.aidl.manager`,
+  `com.fido.asm`, `com.trustonic.teeservice`.
+- `com.google.android.gms.supervision` защищён от отключения
+  («Cannot disable a protected package»), работает как часть GMS.
+
+### Результат
+
+- Число включённых пакетов: **234**, отключённых: **128**.
+- Свободно памяти после перезагрузки: около **1,45–1,5 ГБ**
+  из 3,69 ГБ (`MemAvailable`), с учётом кэша.
+- Проверено после перезагрузки: домашний экран запускается, accessibility
+  включена, блокировка `vk.com` работает, все приложения дока и настройки
+  открываются (`dialer`, Chrome, Camera, Clock, Files, Settings, RuStore,
+  Vol, Diary, MAX).
+- `com.maxim.internal` (maxim RU) отключён как неиспользуемый; при
+  необходимости включается обратно.
+
+### Как вернуть приложение
+
+```powershell
+adb shell pm enable com.android.vending
+adb shell pm enable com.miui.calculator
+adb shell pm enable com.maxim.internal
+```
+
+Список всех отключённых:
+
+```powershell
+adb shell pm list packages -d
+```
+
+APK лаунчера после этих изменений не менялся — переустановка не требуется.
+
 
 
