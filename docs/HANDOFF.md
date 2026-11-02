@@ -622,9 +622,12 @@ SystemUI перезапускается, подсказка исчезает, л
 
 Глобальная настройка `enable_screen_on_proximity_sensor` существует, но
 MIUI не даёт adb shell писать в `Settings.Global`
-(`WRITE_SECURE_SETTINGS`). Без root/device owner отключить датчик
+(`WRITE_SECURE_SETTINGS`). Выдать разрешение приложению через
+`pm grant ... WRITE_SECURE_SETTINGS` тоже нельзя: shell не имеет
+`GRANT_RUNTIME_PERMISSIONS`. Без root/device owner отключить датчик
 программно нельзя. Если подсказка повторяется — проверить зону датчика
-(защитное стекло, чехол, загрязнение) и перезагрузить телефон.
+(защитное стекло, чехол, загрязнение), перезагрузить телефон или
+перезапустить SystemUI.
 
 Файл: `platforms/android/app/src/main/java/org/apache/cordova/labs/kiosk/KioskAccessibilityService.java`
 (методы `updateTopGuard`, `addTopGuard`, `removeTopGuard`).
