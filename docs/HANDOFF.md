@@ -1,7 +1,7 @@
 # MAXA Launcher — полная инструкция и журнал работ
 
 **Дата:** 02.11.2026  
-**Устройство:** Redmi Note 10T (M2103K19Y, Android 15 / MIUI)  
+**Устройство:** Redmi Note 10T (M2103K19Y, Android 13 / MIUI 14)  
 **Пакет:** `com.MAXA_PHONE_LAUNCHER.launcher`  
 **Главная activity:** `org.cordova.plugin.labs.kiosk.KioskActivity`  
 **Текущий APK:** `D:\other\dev\MAXA_PHONE_LAUNCHER\1.apk`  
@@ -235,7 +235,7 @@ com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskAccessibilit
    Переключатель зафиксирован включённым.
 
 3. **Wi-Fi/Bluetooth** — открываются системные экраны. Программно включать
-   Wi-Fi/Bluetooth на Android 15 обычному приложению нельзя, поэтому
+   Wi-Fi/Bluetooth на Android 13 обычному приложению нельзя, поэтому
    используются реальные системные настройки со сканированием и подключением.
 
 4. **Сторонние приложения** — когда открыто чужое приложение, его системная
