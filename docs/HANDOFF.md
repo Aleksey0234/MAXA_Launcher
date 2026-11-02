@@ -562,7 +562,44 @@ adb shell pm enable com.maxim.internal
 adb shell pm list packages -d
 ```
 
-APK лаунчера после этих изменений не менялся — переустановка не требуется.
+APK лаунчера после отключения приложений не менялся — переустановка не
+требуется.
+
+---
+
+## 13. Блокировка шторки после перезагрузки (02.11.2026)
+
+Проблема: `adb shell cmd statusbar send-disable-flag statusbar-expansion recents`
+не сохраняется после перезагрузки. На MIUI без device owner/root применить
+эту команду из приложения нельзя: нужен `android.permission.STATUS_BAR`,
+которого у обычного лаунчера нет (`SecurityException`).
+
+Решение в текущей сборке:
+
+- `KioskAccessibilityService` при старте и при смене активного приложения
+  добавляет невидимую touch-полосу `TYPE_ACCESSIBILITY_OVERLAY` высотой
+  со строку состояния.
+- В чужих приложениях полоса съедает касания в зоне статус-бара — шторку
+  нельзя вытянуть.
+- В лаунчере полоса снимается, чтобы работали собственные быстрые
+  настройки (свайп от верхнего края).
+- Служба accessibility запускается автоматически после перезагрузки,
+  поэтому полоса поднимается без ПК и без ADB.
+- Флаги `send-disable-flag` остаются дополнительной защитой; их можно
+  вернуть скриптом `scripts/reapply-kiosk.ps1`.
+
+Ограничения overlay:
+
+- Он закрывает только верхнюю полосу статус-бара, а не всю шторку;
+  системные жесты из других зон могут работать.
+- Если прошивка не разрешает `TYPE_ACCESSIBILITY_OVERLAY`, в логе будет
+  `Top guard add failed`; тогда остаётся только device owner/root.
+- На MIUI экран был выключен во время автоматической проверки, а ADB
+  не имеет `INJECT_EVENTS`, поэтому свайп нужно проверить вручную:
+  открыть Chrome и потянуть шторку сверху.
+
+Файл: `platforms/android/app/src/main/java/org/apache/cordova/labs/kiosk/KioskAccessibilityService.java`
+(методы `updateTopGuard`, `addTopGuard`, `removeTopGuard`).
 
 
 

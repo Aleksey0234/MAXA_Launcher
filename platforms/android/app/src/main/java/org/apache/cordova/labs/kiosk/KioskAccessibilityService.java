@@ -2,11 +2,17 @@ package org.cordova.plugin.labs.kiosk;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
@@ -94,6 +100,13 @@ public class KioskAccessibilityService extends AccessibilityService {
     private volatile boolean clearingRecents = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
+    // Невидимая полоса поверх строки состояния: не даёт потянуть шторку
+    // в других приложениях. В лаунчере она снимается, чтобы работали
+    // собственные быстрые настройки.
+    private WindowManager windowManager;
+    private View topGuard;
+    private boolean topGuardAdded = false;
+
     public static boolean requestClearAll() {
         KioskAccessibilityService service = instance;
         if (service == null) {
@@ -112,11 +125,21 @@ public class KioskAccessibilityService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         instance = this;
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        // После загрузки лаунчер обычно уже на экране — снимаем полосу,
+        // чтобы не мешать его быстрым настройкам.
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateTopGuard();
+            }
+        }, 800L);
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         instance = null;
+        removeTopGuard();
         return super.onUnbind(intent);
     }
 
@@ -135,6 +158,11 @@ public class KioskAccessibilityService extends AccessibilityService {
 
         final String pkg = event.getPackageName() == null ? "" : event.getPackageName().toString();
         final String cls = event.getClassName() == null ? "" : event.getClassName().toString();
+
+        if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                || type == AccessibilityEvent.TYPE_WINDOWS_CHANGED) {
+            updateTopGuard();
+        }
 
         if (System.currentTimeMillis() - lastActionAt < THROTTLE_MS) {
             return;
@@ -548,6 +576,128 @@ public class KioskAccessibilityService extends AccessibilityService {
             }
         }
         return null;
+    }
+
+    private void updateTopGuard() {
+        String active = getForegroundPackage();
+        if (active.isEmpty()) {
+            return;
+        }
+        if (active.equals(getPackageName())) {
+            removeTopGuard();
+        } else {
+            addTopGuard();
+        }
+    }
+
+    /**
+     * Пакет активного приложения. Сначала смотрим окно TYPE_APPLICATION,
+     * чтобы не принять собственную accessibility-полосу за foreground.
+     */
+    private String getForegroundPackage() {
+        List<AccessibilityWindowInfo> windows = getWindows();
+        if (windows != null) {
+            for (AccessibilityWindowInfo window : windows) {
+                if (window != null && window.isActive()
+                        && window.getType() == AccessibilityWindowInfo.TYPE_APPLICATION) {
+                    String name = packageOf(window);
+                    if (!name.isEmpty()) {
+                        return name;
+                    }
+                }
+            }
+            for (AccessibilityWindowInfo window : windows) {
+                if (window != null && window.isActive()
+                        && window.getType() == AccessibilityWindowInfo.TYPE_SYSTEM) {
+                    String name = packageOf(window);
+                    if (!name.isEmpty()) {
+                        return name;
+                    }
+                }
+            }
+        }
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        if (root == null) {
+            return "";
+        }
+        try {
+            CharSequence name = root.getPackageName();
+            return name == null ? "" : name.toString();
+        } finally {
+            root.recycle();
+        }
+    }
+
+    private String packageOf(AccessibilityWindowInfo window) {
+        AccessibilityNodeInfo root = window.getRoot();
+        if (root == null) {
+            return "";
+        }
+        try {
+            CharSequence name = root.getPackageName();
+            return name == null ? "" : name.toString();
+        } finally {
+            root.recycle();
+        }
+    }
+
+    private void addTopGuard() {
+        if (topGuardAdded || windowManager == null) {
+            return;
+        }
+        topGuard = new View(this) {
+            @Override
+            public boolean onTouchEvent(MotionEvent event) {
+                // Съедаем касания в зоне строки состояния: шторка не тянется.
+                return true;
+            }
+        };
+        topGuard.setBackgroundColor(Color.TRANSPARENT);
+
+        int height = getStatusBarHeight();
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                height,
+                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.TOP | Gravity.START;
+        params.x = 0;
+        params.y = 0;
+        try {
+            windowManager.addView(topGuard, params);
+            topGuardAdded = true;
+            Log.d(TAG, "Top guard added, height=" + height);
+        } catch (Exception e) {
+            topGuard = null;
+            Log.d(TAG, "Top guard add failed: " + e.getMessage());
+        }
+    }
+
+    private void removeTopGuard() {
+        if (!topGuardAdded || topGuard == null || windowManager == null) {
+            topGuardAdded = false;
+            topGuard = null;
+            return;
+        }
+        try {
+            windowManager.removeView(topGuard);
+            Log.d(TAG, "Top guard removed");
+        } catch (Exception ignored) {
+        }
+        topGuard = null;
+        topGuardAdded = false;
+    }
+
+    private int getStatusBarHeight() {
+        int id = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (id > 0) {
+            return getResources().getDimensionPixelSize(id);
+        }
+        return (int) (24 * getResources().getDisplayMetrics().density);
     }
 
     @Override
