@@ -169,12 +169,14 @@ com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskAccessibilit
 - Пустое пространство, без сетки приложений.
 - Учёт выреза/безопасной зоны, полноэкранный режим.
 - Слева — маленькая круглая кнопка **«Закрыть все»** (46×46 px).
+- Под часами — кнопки **Будильник** (`com.android.deskclock`) и **Vol**
+  (`com.vol.app`).
 - Внизу — док ровно из 5 приложений:
   - Телефон → `com.google.android.dialer`
   - MAX → `ru.oneme.app`
   - Браузер → `com.android.chrome`
-  - Будильник → `com.android.deskclock`
   - Камера → `com.android.camera`
+  - Дневник → `ru.mes.dnevnik.fgis`
 - Под доком — собственная нижняя навигация: только **«Назад»** и **«Домой»**.
   Системная навигационная панель в лаунчере скрыта.
 
@@ -255,8 +257,10 @@ com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskAccessibilit
    - Телефон → Google Dialer;
    - MAX → MAX (`ru.oneme.app`);
    - Браузер → Chrome;
-   - Будильник → системный будильник;
-   - Камера → системная камера.
+   - Камера → системная камера;
+   - Дневник → `ru.mes.dnevnik.fgis`.
+   Отдельно проверить кнопки под часами: Будильник → `com.android.deskclock`,
+   Vol → `com.vol.app`.
 3. Нажать круглую кнопку очистки:
    - должно быть мгновенное завершение фоновых приложений;
    - экран «Недавних» не должен открываться.
