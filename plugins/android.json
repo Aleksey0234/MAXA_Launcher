@@ -1,0 +1,21 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-kiosk-launcher": {
+      "PACKAGE_NAME": "com.MAXA_PHONE_LAUNCHER.launcher"
+    },
+    "cordova-plugin-applist2": {
+      "PACKAGE_NAME": "com.MAXA_PHONE_LAUNCHER.launcher"
+    },
+    "cordova-plugin-app-launcher": {
+      "PACKAGE_NAME": "com.MAXA_PHONE_LAUNCHER.launcher"
+    }
+  },
+  "dependent_plugins": {}
+}

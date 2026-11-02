@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#080b14">
+    <title>MAXA Launcher</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Затемнение от ползунка яркости -->
+<div class="dim" id="dim"></div>
+
+<div class="launcher" id="launcher">
+
+    <!-- ВЕРХНЯЯ СТАТУС-ПАНЕЛЬ -->
+    <header class="status-bar" id="statusBar">
+        <div class="status-left">
+            <span class="carrier" id="carrier">МТС</span>
+            <span class="network" id="network">4G</span>
+        </div>
+        <div class="status-right">
+            <span class="notif" id="notif" title="Уведомления">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                    <path d="M10.3 21a2 2 0 0 0 3.4 0"/>
+                </svg>
+                <i class="notif-dot"></i>
+            </span>
+            <span class="signal" id="signal" title="Уровень сигнала">
+                <i></i><i></i><i></i><i></i>
+            </span>
+            <span class="wifi" id="wifiStatus" title="Wi-Fi">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 8.82a15 15 0 0 1 20 0"/>
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                    <path d="M12 20h.01"/>
+                </svg>
+            </span>
+            <span class="battery" title="Заряд батареи">
+                <span class="pct" id="batteryPct">100%</span>
+                <svg viewBox="0 0 26 14" aria-hidden="true">
+                    <rect x="1" y="1" width="20" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <rect class="battery-fill" id="batteryFill" x="3" y="3" width="16" height="8" rx="2" fill="currentColor"/>
+                    <rect x="22.5" y="4.5" width="2" height="5" rx="1" fill="currentColor"/>
+                </svg>
+            </span>
+        </div>
+    </header>
+
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <main class="home" id="home">
+        <section class="clock-wrap">
+            <div class="clock-time" id="clockTime">00:00</div>
+            <div class="clock-date" id="clockDate">—</div>
+        </section>
+
+        <div class="home-apps">
+            <button class="home-app" data-app="alarm" aria-label="Будильник">
+                <span class="home-app-icon icon-alarm">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="13" r="7.5"/>
+                        <path d="M12 9.5V13l2.5 1.5M5 3.5 2.5 6M19 3.5 21.5 6"/>
+                    </svg>
+                </span>
+                <span class="home-app-label">Будильник</span>
+            </button>
+
+            <button class="home-app" data-app="vol" aria-label="Vol">
+                <span class="home-app-icon icon-vol">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 18V6l10-2v12"/>
+                        <circle cx="6.5" cy="18" r="2.5"/>
+                        <circle cx="16.5" cy="16" r="2.5"/>
+                    </svg>
+                </span>
+                <span class="home-app-label">Vol</span>
+            </button>
+        </div>
+
+        <div class="home-fill"></div>
+
+        <!-- Виджет закрытия открытых приложений -->
+        <div class="home-widgets">
+            <button class="clear-widget" id="clearAllBtn" data-action="clear-all" aria-label="Закрыть открытые приложения">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- НИЖНИЙ ДОК: РОВНО 5 ПРИЛОЖЕНИЙ -->
+        <nav class="dock" id="dock">
+            <button class="dock-app" data-app="phone" aria-label="Телефон">
+                <span class="dock-icon icon-phone">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>
+                    </svg>
+                </span>
+                <span class="dock-label">Телефон</span>
+            </button>
+
+            <button class="dock-app" data-app="max" aria-label="MAX">
+                <span class="dock-icon icon-max">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.6 9.6 0 0 1-3.8-.8L3 21l1.4-4a8.2 8.2 0 0 1-1.4-4.5C3 7.4 7 3.5 12 3.5s9 3.6 9 8z"/>
+                        <path d="M8.5 9.5h7M8.5 13.5h4.5"/>
+                    </svg>
+                </span>
+                <span class="dock-label">MAX</span>
+            </button>
+
+            <button class="dock-app" data-app="browser" aria-label="Браузер">
+                <span class="dock-icon icon-browser">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
+                    </svg>
+                </span>
+                <span class="dock-label">Браузер</span>
+            </button>
+
+            <button class="dock-app" data-app="camera" aria-label="Камера">
+                <span class="dock-icon icon-camera">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 7h3l1.5-2h7L17 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>
+                        <circle cx="12" cy="13" r="3.5"/>
+                    </svg>
+                </span>
+                <span class="dock-label">Камера</span>
+            </button>
+
+            <button class="dock-app" data-app="diary" aria-label="Дневник">
+                <span class="dock-icon icon-diary">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 4h12a2 2 0 0 1 2 2v14H6a2 2 0 0 1-2-2V4z"/>
+                        <path d="M4 18h14M8 8h6M8 12h6"/>
+                    </svg>
+                </span>
+                <span class="dock-label">Дневник</span>
+            </button>
+        </nav>
+
+        <!-- Нижняя навигация: только «Назад» и «Домой» -->
+        <nav class="sys-nav" id="sysNav" aria-label="Навигация">
+            <button class="sys-btn" data-action="nav-back" aria-label="Назад">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="sys-btn" data-action="nav-home" aria-label="На главный экран">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+            </button>
+        </nav>
+    </main>
+
+    <!-- ЭКРАН ПРИЛОЖЕНИЙ / НАСТРОЕК -->
+    <section class="screen" id="screen" hidden aria-hidden="true">
+        <header class="screen-head" id="screenHead">
+            <button class="back-btn" id="backBtn" aria-label="Назад">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <h1 class="screen-title" id="screenTitle"></h1>
+            <div class="screen-actions" id="screenActions"></div>
+        </header>
+        <div class="screen-body" id="screenBody"></div>
+    </section>
+
+</div>
+
+<!-- БЫСТРЫЕ НАСТРОЙКИ -->
+<div class="qs-scrim" id="qsScrim" hidden></div>
+<aside class="quick-settings" id="quickSettings" aria-hidden="true">
+    <div class="qs-grabber" id="qsGrabber"></div>
+    <div class="qs-head">
+        <div>
+            <div class="qs-caption">Быстрые настройки</div>
+            <div class="qs-sub" id="qsDateSmall">MAXA Launcher</div>
+        </div>
+        <div class="qs-clock" id="qsClock">00:00</div>
+    </div>
+
+    <div class="qs-grid">
+        <button class="qs-tile" data-toggle="wifi" id="qsWifi">
+            <span class="qs-ico">
+                <svg viewBox="0 0 24 24"><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><path d="M12 20h.01"/></svg>
+            </span>
+            <span class="qs-label">Wi-Fi</span>
+            <span class="qs-state" id="qsWifiState">Вкл</span>
+        </button>
+
+        <button class="qs-tile" data-toggle="bluetooth" id="qsBluetooth">
+            <span class="qs-ico">
+                <svg viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg>
+            </span>
+            <span class="qs-label">Bluetooth</span>
+            <span class="qs-state" id="qsBluetoothState">Выкл</span>
+        </button>
+
+        <button class="qs-tile" data-toggle="flashlight" id="qsFlashlight">
+            <span class="qs-ico">
+                <svg viewBox="0 0 24 24"><path d="M9 2h6l1 6H8l1-6z"/><path d="M8 8h8v4l-3 3v7h-2v-7L8 12V8z"/></svg>
+            </span>
+            <span class="qs-label">Фонарик</span>
+            <span class="qs-state" id="qsFlashlightState">Выкл</span>
+        </button>
+
+        <button class="qs-tile" data-toggle="saver" id="qsSaver">
+            <span class="qs-ico">
+                <svg viewBox="0 0 24 24"><path d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2"/><circle cx="12" cy="12" r="3.2"/></svg>
+            </span>
+            <span class="qs-label">Экономия</span>
+            <span class="qs-state" id="qsSaverState">Выкл</span>
+        </button>
+    </div>
+
+    <button class="qs-settings" id="qsSettings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.1 2.1-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.55V20h-3v-.15a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.9.3l-.1.1L6.6 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.55-1H5v-3h.15a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.3-1.9L6.3 8l2.1-2.1.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.55V4h3v.15a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.6 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.55 1H21v3h-.15a1.7 1.7 0 0 0-1.45 1z"/></svg>
+        <span>Настройки</span>
+    </button>
+
+    <div class="brightness-card">
+        <div class="brightness-head">
+            <span>Яркость</span>
+            <span id="brightnessValue">80%</span>
+        </div>
+        <input type="range" id="brightnessSlider" min="10" max="100" step="1" value="80" aria-label="Яркость">
+    </div>
+
+    <div class="qs-hint">Свайп вверх по шапке — закрыть</div>
+</aside>
+
+<!-- ТОСТ -->
+<div class="toast" id="toast" role="status"></div>
+
+<script src="cordova.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {
+      "config.xml": {
+        "parents": {
+          "/*": [
+            {
+              "xml": "<feature name=\"Kiosk\"><param name=\"android-package\" value=\"org.cordova.plugin.labs.kiosk.Kiosk\" /></feature>",
+              "count": 1
+            }
+          ]
+        }
+      },
+      "AndroidManifest.xml": {
+        "parents": {
+          "/manifest/application/activity[@android:label='@string/activity_name']": [
+            {
+              "xml": "<intent-filter><action android:name=\"android.intent.action.MAIN\" /><category android:name=\"android.intent.category.DEFAULT\" /><category android:name=\"android.intent.category.HOME\" /></intent-filter>",
+              "count": 1
+            },
+            {
+              "xml": "<activity android:keepScreenOn=\"true\" android:name=\"org.cordova.plugin.labs.kiosk.KioskActivity\" android:theme=\"@style/Theme.App.SplashScreen\"></activity>",
+              "count": 1,
+              "mode": "merge",
+              "plugin": "cordova-plugin-kiosk-launcher",
+              "oldAttrib": {
+                "android:configChanges": "orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation",
+                "android:exported": "true",
+                "android:keepScreenOn": "true",
+                "android:label": "@string/activity_name",
+                "android:launchMode": "singleTop",
+                "android:name": "org.cordova.plugin.labs.kiosk.KioskActivity",
+                "android:theme": "@style/Theme.App.SplashScreen",
+                "android:windowSoftInputMode": "adjustResize"
+              }
+            }
+          ],
+          "/manifest/application": [
+            {
+              "xml": "<receiver android:exported=\"false\" android:name=\"org.cordova.plugin.labs.kiosk.MyPackageReplacedEventReceiver\"><intent-filter><action android:name=\"android.intent.action.MY_PACKAGE_REPLACED\" /></intent-filter></receiver>",
+              "count": 1
+            }
+          ],
+          "/manifest": [
+            {
+              "xml": "<uses-permission android:name=\"android.permission.REORDER_TASKS\" />",
+              "count": 1
+            }
+          ],
+          "/*": [
+            {
+              "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
+              "count": 1
+            }
+          ]
+        }
+      },
+      "res/xml/config.xml": {
+        "parents": {
+          "/*": [
+            {
+              "xml": "<feature name=\"Applist\"><param name=\"android-package\" value=\"org.jmrezayi2.Applist.Applist\" /></feature>",
+              "count": 1
+            },
+            {
+              "xml": "<feature name=\"Launcher\"><param name=\"android-package\" value=\"com.hutchind.cordova.plugins.launcher.Launcher\" /></feature>",
+              "count": 1
+            }
+          ]
+        }
+      }
+    }
+  },
+  "installed_plugins": {
+    "cordova-plugin-kiosk-launcher": {
+      "PACKAGE_NAME": "com.MAXA_PHONE_LAUNCHER.launcher"
+    },
+    "cordova-plugin-applist2": {
+      "PACKAGE_NAME": "com.MAXA_PHONE_LAUNCHER.launcher"
+    },
+    "cordova-plugin-app-launcher": {
+      "PACKAGE_NAME": "com.MAXA_PHONE_LAUNCHER.launcher"
+    }
+  },
+  "dependent_plugins": {},
+  "modules": [
+    {
+      "id": "cordova-plugin-kiosk-launcher.kiosk",
+      "file": "plugins/cordova-plugin-kiosk-launcher/www/kiosk.js",
+      "pluginId": "cordova-plugin-kiosk-launcher",
+      "clobbers": [
+        "window.Kiosk"
+      ]
+    },
+    {
+      "id": "cordova-plugin-applist2.Applist",
+      "file": "plugins/cordova-plugin-applist2/www/Applist.js",
+      "pluginId": "cordova-plugin-applist2",
+      "clobbers": [
+        "window.Applist"
+      ]
+    },
+    {
+      "id": "cordova-plugin-app-launcher.Launcher",
+      "file": "plugins/cordova-plugin-app-launcher/www/Launcher.js",
+      "pluginId": "cordova-plugin-app-launcher",
+      "clobbers": [
+        "plugins.launcher"
+      ]
+    }
+  ],
+  "plugin_metadata": {
+    "cordova-plugin-kiosk-launcher": "0.2",
+    "cordova-plugin-applist2": "0.1.4",
+    "cordova-plugin-app-launcher": "0.4.0"
+  }
+}

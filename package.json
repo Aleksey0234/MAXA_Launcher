@@ -1,0 +1,31 @@
+{
+  "name": "com.maxa_phone_launcher.launcher",
+  "displayName": "MAXA_PHONE_LAUNCHER",
+  "version": "1.0.0",
+  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Apache Cordova Team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "cordova-android": "^15.1.0",
+    "cordova-plugin-app-launcher": "^0.4.0",
+    "cordova-plugin-applist2": "^1.0.2-dev",
+    "cordova-plugin-kiosk-launcher": "^1.1.1"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {
+      "cordova-plugin-kiosk-launcher": {},
+      "cordova-plugin-applist2": {},
+      "cordova-plugin-app-launcher": {}
+    }
+  }
+}

@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# Cordova build artifacts
+/platforms/android/app/build/
+/platforms/android/build/
+/platforms/android/.gradle/
+/platforms/android/CordovaLib/build/
+/platforms/android/tools/.gradle/
+/platforms/android/platform_www/
+/platforms/android/app/src/main/assets/www/
+/platforms/android/local.properties
+
+# APK / local binaries
+*.apk
+/default app/
+/1.apk
+
+# IDE
+.idea/
+*.iml
