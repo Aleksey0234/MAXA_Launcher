@@ -579,66 +579,10 @@ public class KioskAccessibilityService extends AccessibilityService {
     }
 
     private void updateTopGuard() {
-        String active = getForegroundPackage();
-        if (active.isEmpty()) {
-            return;
-        }
-        if (active.equals(getPackageName())) {
-            removeTopGuard();
-        } else {
-            addTopGuard();
-        }
-    }
-
-    /**
-     * Пакет активного приложения. Сначала смотрим окно TYPE_APPLICATION,
-     * чтобы не принять собственную accessibility-полосу за foreground.
-     */
-    private String getForegroundPackage() {
-        List<AccessibilityWindowInfo> windows = getWindows();
-        if (windows != null) {
-            for (AccessibilityWindowInfo window : windows) {
-                if (window != null && window.isActive()
-                        && window.getType() == AccessibilityWindowInfo.TYPE_APPLICATION) {
-                    String name = packageOf(window);
-                    if (!name.isEmpty()) {
-                        return name;
-                    }
-                }
-            }
-            for (AccessibilityWindowInfo window : windows) {
-                if (window != null && window.isActive()
-                        && window.getType() == AccessibilityWindowInfo.TYPE_SYSTEM) {
-                    String name = packageOf(window);
-                    if (!name.isEmpty()) {
-                        return name;
-                    }
-                }
-            }
-        }
-        AccessibilityNodeInfo root = getRootInActiveWindow();
-        if (root == null) {
-            return "";
-        }
-        try {
-            CharSequence name = root.getPackageName();
-            return name == null ? "" : name.toString();
-        } finally {
-            root.recycle();
-        }
-    }
-
-    private String packageOf(AccessibilityWindowInfo window) {
-        AccessibilityNodeInfo root = window.getRoot();
-        if (root == null) {
-            return "";
-        }
-        try {
-            CharSequence name = root.getPackageName();
-            return name == null ? "" : name.toString();
-        } finally {
-            root.recycle();
-        }
+        // Полоса нужна всегда, в том числе на главном экране: иначе после
+        // перезагрузки MIUI снова разрешает вытянуть шторку/центр управления.
+        // Быстрые настройки лаунчера открываются свайпом чуть ниже неё.
+        addTopGuard();
     }
 
     private void addTopGuard() {

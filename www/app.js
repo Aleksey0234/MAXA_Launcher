@@ -1233,7 +1233,9 @@
         if (qsOpen) return;
         const t = e.touches[0];
         if (!t) return;
-        if (t.clientY <= 60) {
+        // Accessibility-полоса перекрывает строку состояния, поэтому
+        // свайп для быстрых настроек начинается чуть ниже неё.
+        if (t.clientY <= 110) {
             edgeStartY = t.clientY;
             edgeStartX = t.clientX;
             edgeTracking = true;
