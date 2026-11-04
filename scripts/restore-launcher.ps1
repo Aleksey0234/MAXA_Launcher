@@ -19,7 +19,8 @@ param(
     [string]$NotificationListener = "com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskNotificationListenerService",
     [string]$HomePackage = "com.miui.home",
     [string]$HomeActivity = "com.miui.home/.launcher.Launcher",
-    [switch]$Uninstall
+    [switch]$Uninstall,
+    [switch]$Reboot
 )
 
 $adbArgs = @()
@@ -79,8 +80,8 @@ if ($listeners -and $listeners -ne "null") {
 }
 Write-Host "[ok] notification listener removed"
 
-# 4. Снимаем флаги шторки/«Недавних».
-Run-Adb shell cmd statusbar send-enable-flag statusbar-expansion recents | Out-Null
+# 4. Флаги шторки/«Недавних» снимаются только перезагрузкой:
+#    отдельной shell-команды send-enable-flag на MIUI нет.
 
 # 5. Возвращаем поворот и автояркость.
 Run-Adb shell settings put system accelerometer_rotation 1 | Out-Null
@@ -106,4 +107,10 @@ Write-Host ""
 Write-Host "HOME:"
 Write-Host (Run-Adb shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME).Text
 Write-Host ""
+if ($Reboot) {
+    Write-Host "Rebooting to clear SystemUI kiosk flags..."
+    Run-Adb reboot | Out-Null
+} else {
+    Write-Host "Перезагрузите телефон, чтобы снять флаги шторки/«Недавних»." -ForegroundColor Yellow
+}
 Write-Host "Done." -ForegroundColor Green

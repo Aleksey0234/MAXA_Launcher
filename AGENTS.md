@@ -388,9 +388,9 @@ my-launcher-app/platforms/android/app/src/main/java/org/apache/cordova/labs/kios
 .\scripts\restore-launcher.ps1
 ```
 
-Скрипт включает пакеты, убирает accessibility/уведомления, снимает
-флаги киоска, возвращает MIUI Home и системные настройки. Флаг
-`-Uninstall` дополнительно удаляет лаунчер.
+Скрипт включает пакеты, убирает accessibility/уведомления, возвращает
+MIUI Home и системные настройки. Флаги шторки снимаются перезагрузкой
+(флаг `-Reboot`). Флаг `-Uninstall` дополнительно удаляет лаунчер.
 
 ---
 
