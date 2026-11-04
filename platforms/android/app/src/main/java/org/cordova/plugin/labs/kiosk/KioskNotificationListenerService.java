@@ -56,6 +56,10 @@ public class KioskNotificationListenerService extends NotificationListenerServic
         Log.d(TAG, "Notification feed disabled by launcher");
     }
 
+    public static void requestEnable() {
+        disabled = false;
+    }
+
     public static String snapshotJson() {
         if (disabled) {
             return "[]";

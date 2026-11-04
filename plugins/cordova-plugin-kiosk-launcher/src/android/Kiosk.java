@@ -154,6 +154,7 @@ public class Kiosk extends CordovaPlugin {
                 return true;
 
             } else if (GET_NOTIFICATIONS.equals(action)) {
+                KioskNotificationListenerService.requestEnable();
                 callbackContext.success(KioskNotificationListenerService.snapshotJson());
                 return true;
 
