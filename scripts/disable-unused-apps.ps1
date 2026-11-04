@@ -1,4 +1,9 @@
 ﻿# MAXA Launcher: отключение неиспользуемых приложений
+#
+# ВАЖНО: не отключайте com.miui.cleaner и com.miui.guardprovider.
+# На MIUI они нужны установщику APK, иначе adb install падает с
+# INSTALL_FAILED_USER_RESTRICTED: Install canceled by user.
+#
 # Использование:
 #   .\scripts\disable-unused-apps.ps1            # отключить
 #   .\scripts\disable-unused-apps.ps1 -Restore   # вернуть обратно
@@ -81,14 +86,12 @@ $packages = @(
   "com.miui.backup",
   "com.miui.bugreport",
   "com.miui.calculator",
-  "com.miui.cleaner",
   "com.miui.cloudbackup",
   "com.miui.cloudservice",
   "com.miui.compass",
   "com.miui.extraphoto",
   "com.miui.fm",
   "com.miui.fmservice",
-  "com.miui.guardprovider",
   "com.miui.mediaeditor",
   "com.miui.micloudsync",
   "com.miui.miservice",

@@ -39,9 +39,11 @@ MAXA Launcher заменяет рабочий стол, ограничивает
 
 - MAXA Launcher установлен и выбран домашним экраном.
 - Работает нижний док: Телефон, MAX, Браузер, Камера, Дневник.
-- Под часами работают кнопки Будильник и Vol.
+- Под часами работают кнопки Будильник, Vol и Смс.
 - Включена accessibility-служба: блокируются «Недавние», шторка и сайты
   из списка.
+- Выдан доступ к уведомлениям: на главном экране видна лента MAX, СМС
+  и звонков; нажатие открывает нужное приложение.
 - Системная яркость, фонарик, поворот и автояркость работают.
 - Лишние приложения отключены, но телефон остаётся способен звонить,
   принимать SMS, работать с камерой, файлами и настройками.
@@ -281,6 +283,32 @@ adb shell settings get secure enabled_accessibility_services
 adb shell dumpsys accessibility | findstr /i "MAXA KioskAccessibility"
 ```
 
+### 8.4. Доступ к уведомлениям
+
+Нужен для ленты MAX / СМС / телефона. Включение через ADB:
+
+```powershell
+adb shell cmd notification allow_listener `
+  'com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskNotificationListenerService'
+```
+
+Если ADB не может включить, открой в лаунчере карточку «Разрешить» или
+системные настройки:
+
+**Настройки → Приложения → Специальный доступ → Доступ к уведомлениям →
+MAXA Launcher.**
+
+Проверка:
+
+```powershell
+adb shell settings get secure enabled_notification_listeners
+adb shell dumpsys notification | findstr /i "Allowed notification listeners"
+adb logcat -s KioskNotif:D
+```
+
+В логе должно быть `Listener connected`. Служба фильтрует только
+`ru.oneme.app` (MAX), SMS-пакеты и телефонию; данные не покидают телефон.
+
 ---
 
 ## 9. Настрой приложения лаунчера
@@ -299,7 +327,9 @@ adb shell dumpsys accessibility | findstr /i "MAXA KioskAccessibility"
 - Камера → `com.android.camera`;
 - Дневник → `ru.mes.dnevnik.fgis`;
 - Будильник → `com.android.deskclock`;
-- Vol → `com.vol.app`.
+- Vol → `com.vol.app`;
+- Смс → `com.google.android.apps.messaging` (fallback `com.android.mms`,
+  `com.android.messaging`, `android.intent.action.SENDTO` с `sms:`).
 
 На новом устройстве узнай реальные пакеты:
 
@@ -381,6 +411,8 @@ adb shell pm disable-user --user 0 <package>
 
 - сам лаунчер и его activity;
 - `com.android.systemui`, `com.android.settings`;
+- `com.miui.cleaner`, `com.miui.guardprovider` — на MIUI без них
+  `adb install` падает с `INSTALL_FAILED_USER_RESTRICTED`;
 - `com.android.phone`, `com.android.server.telecom`,
   `com.android.providers.telephony`;
 - `com.android.permissioncontroller`, `com.google.android.packageinstaller`;
@@ -487,6 +519,13 @@ adb shell settings get secure accessibility_enabled
 3. **Приложения дока:** открой каждое через `adb shell monkey -p <pkg> -c android.intent.category.LAUNCHER 1`
    и проверь `dumpsys window | findstr mCurrentFocus`. После каждого —
    `adb shell input keyevent KEYCODE_HOME`.
+
+3a. **Смс и уведомления:** нажми кнопку **Смс** — должен открыться
+   `com.google.android.apps.messaging`. Проверь доступ к уведомлениям
+   (раздел 8.4) и лог `KioskNotif:D` — там `Listener connected`.
+   Отправь себе SMS или сообщение в MAX: в ленте на главном экране
+   появится уведомление с зелёным/фиолетовым/оранжевым бейджем.
+   Нажатие на элемент ленты открывает соответствующий пакет.
 
 4. **Блокировка сайта:** открой `https://vk.com/` в Chrome и проверь лог:
 

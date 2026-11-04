@@ -51,6 +51,9 @@ public class Kiosk extends CordovaPlugin {
     public static final String OPEN_RUSTORE = "openRuStore";
     public static final String OPEN_KEYBOARD_SETTINGS = "openKeyboardSettings";
     public static final String OPEN_FILE_MANAGER = "openFileManager";
+    public static final String GET_NOTIFICATIONS = "getNotifications";
+    public static final String IS_NOTIFICATION_ACCESS_GRANTED = "isNotificationAccessGranted";
+    public static final String OPEN_NOTIFICATION_ACCESS_SETTINGS = "openNotificationAccessSettings";
 
     private static final int REQUEST_CAMERA = 0x0F1A;
 
@@ -147,6 +150,19 @@ public class Kiosk extends CordovaPlugin {
 
             } else if (OPEN_FILE_MANAGER.equals(action)) {
                 openFileManager(callbackContext);
+                return true;
+
+            } else if (GET_NOTIFICATIONS.equals(action)) {
+                callbackContext.success(KioskNotificationListenerService.snapshotJson());
+                return true;
+
+            } else if (IS_NOTIFICATION_ACCESS_GRANTED.equals(action)) {
+                callbackContext.success(Boolean.toString(isNotificationAccessGranted()));
+                return true;
+
+            } else if (OPEN_NOTIFICATION_ACCESS_SETTINGS.equals(action)) {
+                openNotificationAccessSettings();
+                callbackContext.success();
                 return true;
             }
 
@@ -457,10 +473,42 @@ public class Kiosk extends CordovaPlugin {
         }
     }
 
+    private boolean isNotificationAccessGranted() {
+        try {
+            Context ctx = context();
+            String flat = Settings.Secure.getString(
+                    ctx.getContentResolver(), "enabled_notification_listeners");
+            if (flat == null || flat.isEmpty()) {
+                return false;
+            }
+            ComponentName component = new ComponentName(ctx, KioskNotificationListenerService.class);
+            return flat.contains(component.flattenToString());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void openNotificationAccessSettings() {
+        Context ctx = context();
+        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS);
+        ComponentName component = new ComponentName(ctx, KioskNotificationListenerService.class);
+        intent.putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
+                component.flattenToString());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            ctx.startActivity(intent);
+        } catch (Exception e) {
+            Intent fallback = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+            fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(fallback);
+        }
+    }
+
     private String findLauncherPackageName() {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
         final ResolveInfo res = this.cordova.getActivity().getPackageManager().resolveActivity(intent, 0);
         return res != null && res.activityInfo != null ? res.activityInfo.packageName : "";
     }
+
 }

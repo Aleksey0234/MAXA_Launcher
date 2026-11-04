@@ -14,7 +14,8 @@ param(
     [string]$Adb = "adb",
     [string]$Package = "com.MAXA_PHONE_LAUNCHER.launcher",
     [string]$Activity = "org.cordova.plugin.labs.kiosk.KioskActivity",
-    [string]$AccessibilityService = "com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskAccessibilityService"
+    [string]$AccessibilityService = "com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskAccessibilityService",
+    [string]$NotificationListener = "com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskNotificationListenerService"
 )
 
 # Не ставим ErrorActionPreference=Stop: adb пишет предупреждения в stderr,
@@ -82,6 +83,16 @@ if ($enabled -eq "1") {
     } else {
         Write-Warning "accessibility_enabled not changed via ADB (ROM restriction)."
     }
+}
+
+# 2b. Доступ к уведомлениям (MAX / СМС / телефон)
+$listeners = (Run-Adb shell settings get secure enabled_notification_listeners).Text
+if ($listeners -notlike "*$NotificationListener*") {
+    $r = Run-Adb shell cmd notification allow_listener $NotificationListener
+    if ($r.Code -eq 0) { Write-Host "[ok] notification listener enabled" }
+    else { Write-Warning "notification listener not enabled: $($r.Text)" }
+} else {
+    Write-Host "[ok] notification listener already enabled"
 }
 
 # 3. SystemUI: скрыть шторку и «Недавние» (сбрасывается после reboot)

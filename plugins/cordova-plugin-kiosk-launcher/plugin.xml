@@ -43,6 +43,15 @@
                     <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 </intent-filter>
             </receiver>
+            <service
+                android:name="org.cordova.plugin.labs.kiosk.KioskNotificationListenerService"
+                android:label="@string/app_name"
+                android:exported="true"
+                android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+                <intent-filter>
+                    <action android:name="android.service.notification.NotificationListenerService" />
+                </intent-filter>
+            </service>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
@@ -51,6 +60,7 @@
 
         <source-file src="src/android/KioskActivity.java" target-dir="src/org/apache/cordova/labs/kiosk" />
         <source-file src="src/android/Kiosk.java" target-dir="src/org/apache/cordova/labs/kiosk" />
+        <source-file src="src/android/KioskNotificationListenerService.java" target-dir="src/org/cordova/plugin/labs/kiosk" />
         <source-file src="src/android/MyPackageReplacedEventReceiver.java" target-dir="src/org/apache/cordova/labs/kiosk" />
 
     </platform>

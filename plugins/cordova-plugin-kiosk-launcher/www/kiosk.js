@@ -1,3 +1,4 @@
+cordova.define("cordova-plugin-kiosk-launcher.kiosk", function(require, exports, module) {
 var exec = require("cordova/exec");
 
 var Kiosk = {
@@ -89,9 +90,22 @@ var Kiosk = {
     exec(success, error, "Kiosk", "openFileManager", []);
   },
 
+  getNotifications: function(success, error) {
+    exec(success, error, "Kiosk", "getNotifications", []);
+  },
+
+  isNotificationAccessGranted: function(success, error) {
+    exec(success, error, "Kiosk", "isNotificationAccessGranted", []);
+  },
+
+  openNotificationAccessSettings: function(success, error) {
+    exec(success, error, "Kiosk", "openNotificationAccessSettings", []);
+  },
+
   killAll: function(success, error) {
     exec(success, error, "Kiosk", "killAll", []);
   }
 };
 
 module.exports = Kiosk;
+});

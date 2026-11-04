@@ -537,6 +537,12 @@
         vol: [
             { packageName: 'com.vol.app' }
         ],
+        sms: [
+            { packageName: 'com.google.android.apps.messaging' },
+            { packageName: 'com.android.mms' },
+            { packageName: 'com.android.messaging' },
+            { actionName: 'android.intent.action.SENDTO', uri: 'sms:' }
+        ],
         diary: [
             { packageName: 'ru.mes.dnevnik.fgis' },
             { packageName: 'ru.mos.school' },
@@ -569,6 +575,149 @@
             launcher.launch(options, () => {}, () => setTimeout(tryNext, 60));
         };
         tryNext();
+    }
+
+    /* ------------------------------------------------------------
+       Уведомления MAX / СМС / телефона
+       ------------------------------------------------------------ */
+
+    let notifItems = [];
+    let notifAccess = null;
+    let notifTimer = null;
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatNotifTime(ts) {
+        const value = Number(ts);
+        if (!value) return '';
+        const date = new Date(value);
+        if (isNaN(date.getTime())) return '';
+        const now = new Date();
+        if (date.toDateString() === now.toDateString()) {
+            return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+        return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+    }
+
+    function notifBadge(appKey) {
+        if (appKey === 'max') return 'M';
+        if (appKey === 'sms') return 'С';
+        return 'Т';
+    }
+
+    function renderNotifications(items) {
+        notifItems = Array.isArray(items) ? items : [];
+        const area = $('#notifArea');
+        const card = $('#notifAccessCard');
+        const feed = $('#notifFeed');
+        const list = $('#notifFeedList');
+        const count = $('#notifFeedCount');
+        const dot = document.querySelector('#notif .notif-dot');
+        if (!area || !card || !feed || !list) return;
+
+        if (!notifAccess) {
+            card.hidden = false;
+            feed.hidden = true;
+            area.hidden = false;
+            if (dot) dot.hidden = true;
+            return;
+        }
+
+        card.hidden = true;
+        const visible = notifItems.filter((item) => item && (item.title || item.text));
+        if (!visible.length) {
+            feed.hidden = true;
+            area.hidden = true;
+            if (dot) dot.hidden = true;
+            return;
+        }
+
+        feed.hidden = false;
+        area.hidden = false;
+        if (count) count.textContent = visible.length > 1 ? String(visible.length) : '';
+        list.innerHTML = visible.slice(0, 8).map((item) => {
+            const key = item.appKey === 'max' || item.appKey === 'sms' ? item.appKey : 'phone';
+            const title = item.title || item.app || '';
+            const text = item.text || '';
+            return '<button class="notif-item" data-notif-app="' + key + '">' +
+                '<span class="notif-badge ' + key + '">' + notifBadge(key) + '</span>' +
+                '<span class="notif-body">' +
+                    '<span class="notif-title">' + escapeHtml(title) + '</span>' +
+                    '<span class="notif-text">' + escapeHtml(text) + '</span>' +
+                '</span>' +
+                '<span class="notif-time">' + escapeHtml(formatNotifTime(item.time)) + '</span>' +
+            '</button>';
+        }).join('');
+        if (dot) dot.hidden = false;
+    }
+
+    function refreshNotifications() {
+        const kiosk = nativeKiosk();
+        if (!kiosk || typeof kiosk.getNotifications !== 'function') return;
+        kiosk.getNotifications((result) => {
+            let items = [];
+            try {
+                items = typeof result === 'string' ? JSON.parse(result) : result;
+            } catch (e) {
+                items = [];
+            }
+            renderNotifications(items);
+        }, () => {});
+    }
+
+    function checkNotificationAccess() {
+        const kiosk = nativeKiosk();
+        if (!kiosk || typeof kiosk.isNotificationAccessGranted !== 'function') return;
+        kiosk.isNotificationAccessGranted((granted) => {
+            const next = granted === true || granted === 'true';
+            if (next === notifAccess) {
+                if (next) refreshNotifications();
+                return;
+            }
+            notifAccess = next;
+            if (next) refreshNotifications();
+            else renderNotifications([]);
+        }, () => {});
+    }
+
+    function startNotifications() {
+        const btn = $('#notifAccessBtn');
+        if (btn && !btn.dataset.bound) {
+            btn.dataset.bound = '1';
+            btn.addEventListener('click', () => {
+                const kiosk = nativeKiosk();
+                if (kiosk && typeof kiosk.openNotificationAccessSettings === 'function') {
+                    showToast('Включите доступ для MAXA Launcher');
+                    kiosk.openNotificationAccessSettings(() => {}, () => {
+                        showToast('Не удалось открыть настройки уведомлений');
+                    });
+                } else {
+                    showToast('Настройки доступны только на устройстве');
+                }
+            });
+        }
+        const list = $('#notifFeedList');
+        if (list && !list.dataset.bound) {
+            list.dataset.bound = '1';
+            list.addEventListener('click', (event) => {
+                const item = event.target.closest('[data-notif-app]');
+                if (item) launchNativeApp(item.dataset.notifApp);
+            });
+        }
+        checkNotificationAccess();
+        if (!notifTimer) {
+            notifTimer = setInterval(() => {
+                checkNotificationAccess();
+                refreshNotifications();
+            }, 2500);
+        }
     }
 
     /* ------------------------------------------------------------
@@ -1331,6 +1480,7 @@
                     promptWriteSettings(false);
                 }
             });
+            startNotifications();
         };
 
         if (window.cordova) {
@@ -1343,6 +1493,8 @@
             refreshSystemState(function () {
                 applySystemDefaults();
             });
+            checkNotificationAccess();
+            refreshNotifications();
         }, false);
     }
 

@@ -443,8 +443,13 @@ lock task выключен, accessibility-служба выключена; па�
 adb shell pm disable-user --user 0 <package>
 ```
 
-Итого отключено **128** пакетов. Включёнными оставлены только системные
+Итого отключено **126** пакетов. Включёнными оставлены только системные
 компоненты, нужные для связи, камеры, файлов, настроек и самого лаунчера.
+
+**Исключения:** `com.miui.cleaner` и `com.miui.guardprovider` нельзя
+отключать на MIUI — от них зависит установщик APK. Если их отключить,
+`adb install` падает с `INSTALL_FAILED_USER_RESTRICTED: Install canceled
+by user`. На этом устройстве они возвращены в включённое состояние.
 
 ### Что отключено
 
@@ -474,9 +479,9 @@ adb shell pm disable-user --user 0 <package>
   `com.miui.calculator`, `com.miui.weather2`, `com.xiaomi.scanner`,
   `com.miui.screenrecorder`, `com.miui.soundrecorder`, `com.miui.qr`,
   `com.miui.extraphoto`, `com.miui.mediaeditor`, `com.xiaomi.cameratools`,
-  `com.miui.cleaner`, `com.miui.touchassistant`, `com.miui.yellowpage`,
+  `com.miui.touchassistant`, `com.miui.yellowpage`,
   `com.mi.globalminusscreen`, `com.mi.globalbrowser`, `com.miui.mishare.connectivity`,
-  `com.miui.phrase`, `com.miui.backup`, `com.miui.guardprovider`,
+  `com.miui.phrase`, `com.miui.backup`,
   `com.milink.service`, `com.xiaomi.midrop`, `com.xiaomi.calendar`,
   `com.xiaomi.scanner`.
 - **Google-сервисы, не нужные лаунчеру:** `com.google.android.gm`,
@@ -538,7 +543,7 @@ adb shell pm disable-user --user 0 <package>
 
 ### Результат
 
-- Число включённых пакетов: **234**, отключённых: **128**.
+- Число включённых пакетов: **236**, отключённых: **126**.
 - Свободно памяти после перезагрузки: около **1,45–1,5 ГБ**
   из 3,69 ГБ (`MemAvailable`), с учётом кэша.
 - Проверено после перезагрузки: домашний экран запускается, accessibility
@@ -637,6 +642,88 @@ MIUI не даёт adb shell писать в `Settings.Global`
 
 Файл: `platforms/android/app/src/main/java/org/apache/cordova/labs/kiosk/KioskAccessibilityService.java`
 (методы `updateTopGuard`, `addTopGuard`, `removeTopGuard`).
+
+---
+
+## 14. Кнопка СМС и уведомления (04.11.2026)
+
+### Кнопка СМС
+
+На главный экран добавлена кнопка **Смс** (`data-app="sms"`).
+Пакеты в `www/app.js` → `NATIVE_APPS.sms`:
+
+- `com.google.android.apps.messaging`;
+- `com.android.mms`;
+- `com.android.messaging`;
+- fallback `android.intent.action.SENDTO` с `sms:`.
+
+Проверено: кнопка открывает Google Messages
+(`com.google.android.apps.messaging`).
+
+### Уведомления
+
+Добавлен `KioskNotificationListenerService`:
+
+- файл:
+  `platforms/android/app/src/main/java/org/cordova/plugin/labs/kiosk/KioskNotificationListenerService.java`;
+- это **top-level** класс, не вложенный: Android не смог привязать
+  вложенный `Kiosk$KioskNotificationListenerService`
+  (`service not found`);
+- манифест:
+  `org.cordova.plugin.labs.kiosk.KioskNotificationListenerService`,
+  permission `BIND_NOTIFICATION_LISTENER_SERVICE`, exported=true;
+- фильтр пакетов:
+  - MAX — `ru.oneme.app`;
+  - СМС — `com.google.android.apps.messaging`, `com.android.mms`,
+    `com.android.messaging`, Samsung/OPPO/OnePlus SMS;
+  - телефон — `com.android.phone`, `com.google.android.dialer`,
+    `com.android.server.telecom`, `com.android.incallui`;
+- групповые summary пропускаются, чтобы не дублировать;
+- данные хранятся только в памяти, никуда не отправляются.
+
+Включение доступа:
+
+```powershell
+adb shell cmd notification allow_listener `
+  'com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskNotificationListenerService'
+```
+
+Проверка:
+
+```powershell
+adb shell dumpsys notification | findstr /i "Allowed notification listeners"
+adb logcat -s KioskNotif:D
+```
+
+В логе должно быть `Listener connected`.
+
+UI:
+
+- лента под кнопками Будильник/Vol/Смс;
+- показывает до 8 последних уведомлений, обновление раз в 2,5 с;
+- нажатие на уведомление открывает соответствующий пакет;
+- красная точка на колокольчике скрывается, когда уведомлений нет;
+- если доступ не выдан, показывается карточка «Разрешить» с переходом
+  в системные настройки.
+
+Проверено на реальных СМС: в ленте появились «БАБУЛА» и «Max»,
+нажатие на уведомление открыло Google Messages.
+
+### Важно для установки
+
+На MIUI нельзя отключать `com.miui.cleaner` и `com.miui.guardprovider`:
+без них `adb install` падает с
+`INSTALL_FAILED_USER_RESTRICTED: Install canceled by user`.
+Перед установкой проверьте:
+
+```powershell
+adb shell pm enable com.miui.cleaner
+adb shell pm enable com.miui.guardprovider
+```
+
+Также `kiosk.js` должен быть обёрнут в
+`cordova.define("cordova-plugin-kiosk-launcher.kiosk", ...)`, иначе
+WebView пишет `require is not defined` и `window.Kiosk` не создаётся.
 
 
 

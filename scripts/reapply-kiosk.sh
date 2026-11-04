@@ -17,6 +17,7 @@ SERIAL="${SERIAL:-}"
 PKG="${PKG:-com.MAXA_PHONE_LAUNCHER.launcher}"
 ACT="${ACT:-org.cordova.plugin.labs.kiosk.KioskActivity}"
 A11Y="${A11Y:-com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskAccessibilityService}"
+LISTENER="${LISTENER:-com.MAXA_PHONE_LAUNCHER.launcher/org.cordova.plugin.labs.kiosk.KioskNotificationListenerService}"
 
 adb_args=()
 if [[ -n "$SERIAL" ]]; then
@@ -79,6 +80,18 @@ elif run_adb shell settings put secure accessibility_enabled 1 >/dev/null 2>&1; 
   echo "[ok] accessibility_enabled=1"
 else
   echo "[warn] accessibility_enabled not changed via ADB (ROM restriction)"
+fi
+
+# 2b. Notification access (MAX / SMS / phone)
+listeners="$(run_adb shell settings get secure enabled_notification_listeners 2>/dev/null | tr -d '\r' || true)"
+if [[ "$listeners" != *"$LISTENER"* ]]; then
+  if run_adb shell cmd notification allow_listener "$LISTENER" >/dev/null 2>&1; then
+    echo "[ok] notification listener enabled"
+  else
+    echo "[warn] notification listener not enabled"
+  fi
+else
+  echo "[ok] notification listener already enabled"
 fi
 
 # 3. SystemUI flags (reset after reboot)
