@@ -1076,7 +1076,13 @@
             '<div class="list-row" data-action="open-rustore">' + icon('settings') +
             '<div class="row-main"><div class="row-title">Открыть RuStore</div><div class="row-sub">Магазин приложений RuStore</div></div>' + ICONS.chevron + '</div>' +
             '</div>' +
-            '<button class="danger-btn" data-action="disable-dev">Отключить режим разработчика</button>'
+            '<button class="danger-btn" data-action="disable-dev">Отключить режим разработчика</button>' +
+            '<div class="section-label">Лаунчер</div>' +
+            '<div class="card">' +
+            '<div class="list-row" data-action="disable-launcher">' + icon('grid') +
+            '<div class="row-main"><div class="row-title">Отключить лаунчер</div><div class="row-sub">Вернуть стандартный рабочий стол и снять ограничения</div></div>' + ICONS.chevron + '</div>' +
+            '</div>' +
+            '<div class="dev-note">Отключённые приложения возвращаются скриптом <code>restore-launcher.ps1</code> с компьютера — обычное приложение не может включать чужие пакеты.</div>'
     });
 
     function devToggleRow(key, title, sub, iconName) {
@@ -1304,6 +1310,24 @@
                 save();
                 showToast(state.frontCamera ? 'Фронтальная камера' : 'Основная камера');
                 break;
+            case 'disable-launcher': {
+                const ok = window.confirm(
+                    'Отключить лаунчер?\n\n' +
+                    'Откроется выбор стандартного рабочего стола. Выберите MIUI Home и «Всегда». ' +
+                    'Отключённые приложения возвращаются скриптом restore-launcher.ps1 с компьютера.'
+                );
+                if (!ok) break;
+                const kiosk = nativeKiosk();
+                if (kiosk && typeof kiosk.disableLauncher === 'function') {
+                    showToast('Выберите стандартный рабочий стол');
+                    kiosk.disableLauncher(function () {}, function (err) {
+                        showToast('Не удалось отключить: ' + err);
+                    });
+                } else {
+                    showToast('Доступно только на устройстве');
+                }
+                break;
+            }
             case 'disable-dev':
                 state.devMode = false;
                 save();

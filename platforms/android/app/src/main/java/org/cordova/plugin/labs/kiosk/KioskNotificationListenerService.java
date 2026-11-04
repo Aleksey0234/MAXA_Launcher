@@ -28,6 +28,7 @@ public class KioskNotificationListenerService extends NotificationListenerServic
 
     private static final Map<String, JSONObject> ITEMS = new LinkedHashMap<>();
     private static volatile boolean connected = false;
+    private static volatile boolean disabled = false;
 
     private static final String[] WANTED_PACKAGES = {
             "ru.oneme.app",
@@ -47,7 +48,18 @@ public class KioskNotificationListenerService extends NotificationListenerServic
         return connected;
     }
 
+    public static void requestDisable() {
+        disabled = true;
+        synchronized (ITEMS) {
+            ITEMS.clear();
+        }
+        Log.d(TAG, "Notification feed disabled by launcher");
+    }
+
     public static String snapshotJson() {
+        if (disabled) {
+            return "[]";
+        }
         JSONArray result = new JSONArray();
         List<JSONObject> values;
         synchronized (ITEMS) {
@@ -118,7 +130,7 @@ public class KioskNotificationListenerService extends NotificationListenerServic
     }
 
     private static void add(StatusBarNotification sbn) {
-        if (sbn == null) {
+        if (disabled || sbn == null) {
             return;
         }
         String pkg = sbn.getPackageName();

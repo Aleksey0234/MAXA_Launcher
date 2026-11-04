@@ -102,6 +102,10 @@ var Kiosk = {
     exec(success, error, "Kiosk", "openNotificationAccessSettings", []);
   },
 
+  disableLauncher: function(success, error) {
+    exec(success, error, "Kiosk", "disableLauncher", []);
+  },
+
   killAll: function(success, error) {
     exec(success, error, "Kiosk", "killAll", []);
   }

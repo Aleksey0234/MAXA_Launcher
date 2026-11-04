@@ -121,6 +121,21 @@ public class KioskAccessibilityService extends AccessibilityService {
         return true;
     }
 
+    public static void requestDisableSelf() {
+        final KioskAccessibilityService service = instance;
+        if (service == null) {
+            return;
+        }
+        service.handler.post(new Runnable() {
+            @Override
+            public void run() {
+                service.removeTopGuard();
+                service.disableSelf();
+                Log.d(TAG, "Accessibility service disabled by launcher");
+            }
+        });
+    }
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();

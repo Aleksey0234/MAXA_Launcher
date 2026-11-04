@@ -54,6 +54,7 @@ public class Kiosk extends CordovaPlugin {
     public static final String GET_NOTIFICATIONS = "getNotifications";
     public static final String IS_NOTIFICATION_ACCESS_GRANTED = "isNotificationAccessGranted";
     public static final String OPEN_NOTIFICATION_ACCESS_SETTINGS = "openNotificationAccessSettings";
+    public static final String DISABLE_LAUNCHER = "disableLauncher";
 
     private static final int REQUEST_CAMERA = 0x0F1A;
 
@@ -163,6 +164,10 @@ public class Kiosk extends CordovaPlugin {
             } else if (OPEN_NOTIFICATION_ACCESS_SETTINGS.equals(action)) {
                 openNotificationAccessSettings();
                 callbackContext.success();
+                return true;
+
+            } else if (DISABLE_LAUNCHER.equals(action)) {
+                disableLauncher(callbackContext);
                 return true;
             }
 
@@ -501,6 +506,48 @@ public class Kiosk extends CordovaPlugin {
             Intent fallback = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
             fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             ctx.startActivity(fallback);
+        }
+    }
+
+    private void disableLauncher(CallbackContext callbackContext) {
+        try {
+            Context ctx = context();
+            // Возвращаем системные настройки, которые лаунчер менял при старте.
+            try {
+                Settings.System.putInt(ctx.getContentResolver(),
+                        Settings.System.ACCELEROMETER_ROTATION, 1);
+                Settings.System.putInt(ctx.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_MODE,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+            } catch (Exception ignored) {
+            }
+
+            // Снимаем overlay и отключаем accessibility-службу.
+            KioskAccessibilityService.requestDisableSelf();
+            // Больше не показываем уведомления в лаунчере.
+            KioskNotificationListenerService.requestDisable();
+            KioskActivity.kioskModeEnabled = false;
+
+            // Пытаемся сбросить предпочтительный HOME. Если прошивка
+            // запрещает — пользователь выберет рабочий стол в диалоге.
+            try {
+                ctx.getPackageManager().clearPackagePreferredActivities(ctx.getPackageName());
+            } catch (Exception ignored) {
+            }
+
+            Intent home = new Intent(Intent.ACTION_MAIN);
+            home.addCategory(Intent.CATEGORY_HOME);
+            home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent chooser = Intent.createChooser(home, "Выберите стандартный рабочий стол");
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(chooser);
+
+            if (cordova.getActivity() != null) {
+                cordova.getActivity().finishAndRemoveTask();
+            }
+            callbackContext.success("DISABLED");
+        } catch (Exception e) {
+            callbackContext.error(e.getMessage());
         }
     }
 

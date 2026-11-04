@@ -725,5 +725,51 @@ adb shell pm enable com.miui.guardprovider
 `cordova.define("cordova-plugin-kiosk-launcher.kiosk", ...)`, иначе
 WebView пишет `require is not defined` и `window.Kiosk` не создаётся.
 
+---
+
+## 15. Отключение лаунчера (04.11.2026)
+
+В «Для разработчиков» (PIN `0234`) добавлен пункт
+**«Отключить лаунчер»**.
+
+Что делает:
+
+- показывает подтверждение;
+- возвращает автоповорот и автояркость в системное состояние (`1`);
+- снимает невидимую touch-полосу и вызывает `disableSelf()` у
+  accessibility-службы;
+- перестаёт отдавать уведомления в ленту;
+- сбрасывает `KioskActivity.kioskModeEnabled`;
+- пытается очистить preferred HOME и открывает системный выбор
+  «Выберите главное приложение» (MAXA Launcher / Рабочий стол MIUI);
+- закрывает activity лаунчера (`finishAndRemoveTask`).
+
+Проверено: после нажатия лаунчер закрывается, accessibility-служба
+становится `null`, открывается выбор рабочего стола, после выбора
+MIUI Home возвращается стандартный экран.
+
+### Ограничение
+
+Обычное Android-приложение **не может включать чужие пакеты**:
+`PackageManager.setApplicationEnabledSetting` требует
+`CHANGE_COMPONENT_ENABLED_STATE` (signature permission). Поэтому
+пункт отключает лаунчер и киоск, но 126 ранее отключённых приложений
+возвращаются скриптом с компьютера:
+
+```powershell
+.\scripts\restore-launcher.ps1
+```
+
+Скрипт:
+
+- включает пакеты из `disable-unused-apps.ps1`;
+- убирает accessibility-службу и доступ к уведомлениям;
+- снимает флаги шторки/«Недавних»;
+- возвращает автоповорот и автояркость;
+- назначает `com.miui.home/.launcher.Launcher` домашним;
+- по флагу `-Uninstall` удаляет лаунчер.
+
+Это ограничение Android/MIUI, а не ошибка кода.
+
 
 
